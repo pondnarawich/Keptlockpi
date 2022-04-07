@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, redirect, flash, session, url_for
 from flask_login import login_user, login_required, current_user, logout_user, LoginManager
 import os
-from time import sleep
+import time
 import threading
 
 template_dir = os.path.abspath('templates')
@@ -11,6 +11,8 @@ app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.session_protection = "strong"
+
+stop_threads = False
 
 
 @login_manager.user_loader
@@ -112,15 +114,25 @@ def rfid_page():
 @app.route('/keptlock/rfid', methods=['POST', 'PUT', 'GET', 'DELETE'])
 @login_required
 def rfid_api():
+    global stop_threads
 
-    def open_locker(slot):
+    def open_locker(slot_no):
+        timeout = time.time() + 60  # 1 minute
         if slot == "all":
             print("open all")
             # TODO do something with the locker
+            while True:
+                print("open all")
+                if stop_threads or time.time() > timeout:
+                    break
         else:
-            print("open slot#", slot)
+            print("open slot#", slot_no)
             # TODO do something with the locker
-            
+            while True:
+                print("open slot#", slot_no)
+                if stop_threads or time.time() > timeout:
+                    break
+
     # mock up data (UID of the locker account)
     uid = 12345678
     if uid != current_user.id:
@@ -144,7 +156,9 @@ def rfid_api():
                     x = threading.Thread(target=open_locker, args=(slot,))
                     x.start()
                     return redirect("http://127.0.0.1:8000/keptlock/rfid#popup"+slot)
-
+            if key.startswith('cancel'):
+                stop_threads = True
+                return redirect("http://127.0.0.1:8000/keptlock/rfid#")
     return redirect("http://127.0.0.1:8000/keptlock/rfid#")
 
 

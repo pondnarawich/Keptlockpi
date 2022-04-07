@@ -41,10 +41,10 @@
             {% for slot in slots %}
               {% set count.value = count.value + 1 %}
               {% if not slot.opened %}
-                <input type="submit" class="can" href="#popup{{count.value}}" value="Open Slot #{{count.value}}" name="open.{{count.value}}" />
+                <input type="submit" class="can" value="Open Slot #{{count.value}}" name="open.{{count.value}}" />
               {% else %}
               {% if slot.opened%}
-               <input class="cannot" value="Slot #{{count.value}} is opened" name="open.{{count.value}}"disabled/>
+               <input class="cannot" value="Slot #{{count.value}} is opened" name="open.{{count.value}}" disabled/>
               {% endif %}
               {% endif %}
             {% endfor %}
@@ -53,7 +53,7 @@
             {% if not open_all_allow %}
               <input class="cannot" value="All slot are already opened" disabled/>
             {% else %}
-              <input type="submit" class="can" href="#popup{{(locker.size) + 1}}" value="Open all slots" name="open.all" />
+              <input type="submit" class="can" value="Open all slots" name="open.all"/>
             {% endif %}
 
           </form>
@@ -72,15 +72,42 @@
           To unlock slot #{{slot}}, Please use your card
         </div>
         {% endif %}
+        <div class="content" id="countdown{{slot}}">
+         Time Left : 60 Second
+        </div>
           <form action="" method="post">
               <div class="button">
-<!--                  <input name="open.{{slot+1}}" type="submit" value="Confirm" class="btn_con">-->
-                  <a href="#"class="btn_can">Cancel</a>
+                  <input name="cancel" type="submit" value="Cancel" class="btn_can">
+<!--                  <a href="#"class="btn_can">Cancel</a>-->
               </div>
           </form>
       </div>
     </div>
   {% endfor %}
+
+ <script type="text/javascript">
+     let timeleft = 60;
+      let downloadTimer = setInterval(function() {
+          let size = "{{locker.size + 2}}"
+          timeleft -= 1;
+      if(timeleft <= 0){
+        clearInterval(downloadTimer);
+          for (let i = 0; i < size; i++){
+              document.getElementById("countdown"+i).innerHTML = "Timeout";
+          }
+         location.replace("http://127.0.0.1:8000/keptlock/rfid#")
+      } else{
+          for (let i = 0; i < size; i++){
+              document.getElementById("countdown"+i).innerHTML = "Time Left : " + timeleft + " second";
+          }
+      }
+
+    }, 1000);
+
+
+
+
+  </script>
 
     
     </section>
