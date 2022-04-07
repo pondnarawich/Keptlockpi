@@ -616,7 +616,7 @@ section{
   padding:3rem 10rem;
   border-radius: 0.5rem;
   background: var(--white);
-    
+    text-align: center;
 }
 
 .rfid .locker .open .cannot{
@@ -625,6 +625,7 @@ section{
   padding:3rem 10rem;
   border-radius: 0.5rem;
   background: var(--red);
+    text-align: center;
 
 }
 

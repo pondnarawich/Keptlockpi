@@ -34,33 +34,29 @@
       
        <div class="locker" >
           
-          <div class="open">
+          <form class="open" method="post">
               <h2>Select the slot</h2>
 
             {% set count = namespace(value=0) %}
             {% for slot in slots %}
               {% set count.value = count.value + 1 %}
               {% if not slot.opened %}
-                <a class="button" href="#popup{{count.value}}"><div class="can">
-                <h1>Open Slot #{{count.value}}</h1></div></a>
+                <input type="submit" class="can" href="#popup{{count.value}}" value="Open Slot #{{count.value}}" name="open.{{count.value}}" />
               {% else %}
               {% if slot.opened%}
-               <a class="button" disabled><div class="cannot">
-               <h1>Slot #{{count.value}} is opened</h1></div></a>
+               <input class="cannot" value="Slot #{{count.value}} is opened" name="open.{{count.value}}"disabled/>
               {% endif %}
               {% endif %}
             {% endfor %}
 
 
             {% if not open_all_allow %}
-              <a class="button" ><div class="cannot">
-                <h1>All slot are already opened</h1></div></a>
+              <input class="cannot" value="All slot are already opened" disabled/>
             {% else %}
-              <a class="button" href="#popup{{(locker.size) + 1}}" disabled><div class="can">
-               <h1>Open all slots</h1></div></a>
+              <input type="submit" class="can" href="#popup{{(locker.size) + 1}}" value="Open all slots" name="open.all" />
             {% endif %}
 
-          </div> 
+          </form>
     </div>
 
   {% for slot in range((locker.size) + 2)%}
@@ -69,16 +65,16 @@
         <h2>Confirmation</h2>
         {% if slot == ((locker.size) + 1) %}
         <div class="content">
-          Are you sure, you want to unlock All slots ?
+          To unlock All slots, Please use your card
         </div>
         {% else %}
         <div class="content">
-          Are you sure, you want to unlock slot #{{slot}} ?
+          To unlock slot #{{slot}}, Please use your card
         </div>
         {% endif %}
           <form action="" method="post">
               <div class="button">
-                  <input name="open.{{slot+1}}" type="submit" value="Confirm" class="btn_con">
+<!--                  <input name="open.{{slot+1}}" type="submit" value="Confirm" class="btn_con">-->
                   <a href="#"class="btn_can">Cancel</a>
               </div>
           </form>

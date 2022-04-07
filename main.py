@@ -1,6 +1,8 @@
 from flask import Flask, request, render_template, redirect, flash, session, url_for
 from flask_login import login_user, login_required, current_user, logout_user, LoginManager
 import os
+from time import sleep
+import threading
 
 template_dir = os.path.abspath('templates')
 static_dir = os.path.abspath('static')
@@ -111,6 +113,14 @@ def rfid_page():
 @login_required
 def rfid_api():
 
+    def open_locker(slot):
+        if slot == "all":
+            print("open all")
+            # TODO do something with the locker
+        else:
+            print("open slot#", slot)
+            # TODO do something with the locker
+            
     # mock up data (UID of the locker account)
     uid = 12345678
     if uid != current_user.id:
@@ -124,12 +134,16 @@ def rfid_api():
         for key in request.form:
             if key.startswith('open.'):
                 slot = key.partition('.')[-1]
-                if slot == locker.size + 1:
-                    # TODO do something with the locker
+                if slot == "all":
                     print("open all slots")
+                    x = threading.Thread(target=open_locker, args=("all",))
+                    x.start()
+                    return redirect("http://127.0.0.1:8000/keptlock/rfid#popup"+ str(locker.size + 1))
                 else:
-                    # TODO do something with the locker
                     print("turn on slot no.", slot)
+                    x = threading.Thread(target=open_locker, args=(slot,))
+                    x.start()
+                    return redirect("http://127.0.0.1:8000/keptlock/rfid#popup"+slot)
 
     return redirect("http://127.0.0.1:8000/keptlock/rfid#")
 
