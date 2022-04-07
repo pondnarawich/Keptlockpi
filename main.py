@@ -95,12 +95,22 @@ def rfid_page():
 
     slots = [slot1, slot2, slot3]
 
-    return render_template('rfid.html', locker=locker, slots=slots)
+    count = 0
+    for slot in slots:
+        if slot.opened:
+            count += 1
+
+    open_all_allow = True
+    if count == locker.size:
+        open_all_allow = False
+
+    return render_template('rfid.html', locker=locker, slots=slots, open_all_allow=open_all_allow)
 
 
 @app.route('/keptlock/rfid', methods=['POST', 'PUT', 'GET', 'DELETE'])
 @login_required
 def rfid_api():
+
     # mock up data (UID of the locker account)
     uid = 12345678
     if uid != current_user.id:
@@ -121,7 +131,7 @@ def rfid_api():
                     # TODO do something with the locker
                     print("turn on slot no.", slot)
 
-    return redirect("http://127.0.0.1:8000/keptlock/rfid")
+    return redirect("http://127.0.0.1:8000/keptlock/rfid#")
 
 
 @app.route('/keptlock/pin')
@@ -149,7 +159,7 @@ def pin_api():
         pin = request.form['pin_enter']
         # TODO check pin in the database and get slot no.
         slot = 1
-        pin_exist = False
+        pin_exist = True
         pin_expired = False
         if not pin_exist:
             flash("Invalid pin")

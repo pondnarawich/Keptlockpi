@@ -728,6 +728,108 @@ section{
   
 }
 
+.motto{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--white);
+  background-position: center;
+  /*background-size: length;*/
+  padding-top: 12rem;
+  padding-bottom: 4rem;
+}
+
+.motto_small{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--white);
+  background-position: center;
+  /*background-size: length;*/
+  padding-top: 9rem;
+  padding-bottom: 0.5rem;
+}
+
+.motto_small .icons{
+  color: var(--light_dark_grey);
+  padding-left: 2rem;
+    font-size: 2rem;
+}
+
+.motto_small .icons:hover{
+  color: var(--yellow);
+    transform: scale(1.01);
+    cursor: pointer;
+
+}
+
+.motto .content{
+    width:30rem;
+}
+
+.motto_small .content_small{
+    min-width:10rem;
+}
+
+.motto .content h3{
+    text-align: center;
+    color:var(--black);
+    font-size: 2.25rem;
+    padding-top: 2rem;
+}
+
+.motto_small .content_small h1{
+    text-align: center;
+    color:var(--black);
+    font-size: 3rem;
+    margin-left: 2rem;
+}
+
+.motto .content p{
+    color:var(--black);
+    font-size: 1rem;
+/*     padding:1rem 0; */
+    padding-right: 2rem;
+    line-height: 4;
+    text-align: right;
+}
+
+.motto .image{
+  max-height: 15rem;
+  max-width : 15rem;
+}
+
+.motto_small .image_small{
+  max-height: 7rem;
+  max-width : 7rem;
+}
+
+.motto .image img{
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.motto_small .image_small img{
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.exists{
+    padding:3rem;
+    background: var(--red);
+    color: var(--white);
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.exists a{
+    color: var(--white);
+    text-decoration: underline;
+}
+
+
 
 
 

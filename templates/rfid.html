@@ -38,33 +38,32 @@
               <h2>Select the slot</h2>
 
             {% set count = namespace(value=0) %}
-            {% set count_open = namespace(value=0) %}
             {% for slot in slots %}
               {% set count.value = count.value + 1 %}
               {% if not slot.opened %}
-              {% set count_open.value = count_open.value + 1 %}
                 <a class="button" href="#popup{{count.value}}"><div class="can">
                 <h1>Open Slot #{{count.value}}</h1></div></a>
               {% else %}
               {% if slot.opened%}
-               <a class="button" href="#popup{{count.value}}" disabled><div class="cannot">
+               <a class="button" disabled><div class="cannot">
                <h1>Slot #{{count.value}} is opened</h1></div></a>
               {% endif %}
               {% endif %}
             {% endfor %}
 
-            {% if count_open.value == locker.size %}
-              <a class="button" href="#popup{{(locker.size) + 1}}"><div class="cannot">
-                <h1>Some slot is already open</h1></div></a>
+
+            {% if not open_all_allow %}
+              <a class="button" ><div class="cannot">
+                <h1>All slot are already opened</h1></div></a>
             {% else %}
-              <a class="button" href="#popup{{locker.size) + 1}}" disabled><div class="can">
+              <a class="button" href="#popup{{(locker.size) + 1}}" disabled><div class="can">
                <h1>Open all slots</h1></div></a>
             {% endif %}
 
           </div> 
     </div>
 
-  {% for slot in range((locker.size) + 1)%}
+  {% for slot in range((locker.size) + 2)%}
      <div id="popup{{slot}}" class="overlay">
       <div class="popup">
         <h2>Confirmation</h2>
@@ -74,7 +73,7 @@
         </div>
         {% else %}
         <div class="content">
-          Are you sure, you want to unlock slot #{{slot+1}} ?
+          Are you sure, you want to unlock slot #{{slot}} ?
         </div>
         {% endif %}
           <form action="" method="post">
