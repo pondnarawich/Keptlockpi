@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kept-lock</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+
+    <!-- font awesome cdn link  -->
+    <script src="https://kit.fontawesome.com/802ccae5cc.js" crossorigin="anonymous"></script>
+
+    <!-- custom css file link  -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+  
+  
+  <body id="light_navy">
+     <header class="header">
+      <a class="logo"> Kept-lock </a>
+    </header> 
+
+    <section class="rfid">
+        
+       <a href="http://127.0.0.1:8000/keptlock/mode" ><div class="box">
+        <div class="fas fa-circle-left" ></div>
+        <div class="content">
+          <h1>Back to home !</h1>
+        </div>
+      </div></a>
+      
+       <div class="locker" >
+          
+          <div class="open">
+              <h2>Select the slot</h2>
+
+            {% set count = namespace(value=0) %}
+            {% set count_open = namespace(value=0) %}
+            {% for slot in slots %}
+              {% set count.value = count.value + 1 %}
+              {% if not slot.opened %}
+              {% set count_open.value = count_open.value + 1 %}
+                <a class="button" href="#popup{{count.value}}"><div class="can">
+                <h1>Open Slot #{{count.value}}</h1></div></a>
+              {% else %}
+              {% if slot.opened%}
+               <a class="button" href="#popup{{count.value}}" disabled><div class="cannot">
+               <h1>Slot #{{count.value}} is opened</h1></div></a>
+              {% endif %}
+              {% endif %}
+            {% endfor %}
+
+            {% if count_open.value == locker.size %}
+              <a class="button" href="#popup{{(locker.size) + 1}}"><div class="cannot">
+                <h1>Some slot is already open</h1></div></a>
+            {% else %}
+              <a class="button" href="#popup{{locker.size) + 1}}" disabled><div class="can">
+               <h1>Open all slots</h1></div></a>
+            {% endif %}
+
+          </div> 
+    </div>
+
+  {% for slot in range((locker.size) + 1)%}
+     <div id="popup{{slot}}" class="overlay">
+      <div class="popup">
+        <h2>Confirmation</h2>
+        {% if slot == ((locker.size) + 1) %}
+        <div class="content">
+          Are you sure, you want to unlock All slots ?
+        </div>
+        {% else %}
+        <div class="content">
+          Are you sure, you want to unlock slot #{{slot+1}} ?
+        </div>
+        {% endif %}
+          <form action="" method="post">
+              <div class="button">
+                  <input name="open.{{slot+1}}" type="submit" value="Confirm" class="btn_con">
+                  <a href="#"class="btn_can">Cancel</a>
+              </div>
+          </form>
+      </div>
+    </div>
+  {% endfor %}
+
+    
+    </section>
+
+<!-- login section ends -->
+        
+    
+  </body>
+
+</html>
+

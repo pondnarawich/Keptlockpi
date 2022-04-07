@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kept-lock</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+
+    <!-- font awesome cdn link  -->
+    <script src="https://kit.fontawesome.com/802ccae5cc.js" crossorigin="anonymous"></script>
+
+    <!-- custom css file link  -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+  
+  
+  <body id="light_navy">
+    <header class="header">
+      <a class="logo"> Kept-lock </a>
+    </header> 
+
+
+   <section class="mode_selection">
+      <a class="box" href="http://127.0.0.1:8000/keptlock/rfid">
+        <h3>Unlock by card</h3>
+        <div class="icons">
+          <div class="fas fa-credit-card"></div>
+        </div>
+      </a>
+
+      <a class="box" href="http://127.0.0.1:8000/keptlock/pin">
+        <h3>Unlock by pin</h3>
+         <div class="icons">
+          <div class="fas fa-hashtag"></div>
+        </div>
+      </a>
+
+   </section>
+        
+  </body>
+
+</html>
+
