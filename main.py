@@ -9,86 +9,100 @@ template_dir = os.path.abspath('templates')
 static_dir = os.path.abspath('static')
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.session_protection = "strong"
+
+led = 2
+
+global cap
+global videoWriter
+global camera_status
+
+gpio.setwarnings(False)
+gpio.cleanup()
+gpio.setmode(gpio.BCM)
+gpio.setup(led, gpio.OUT)
+gpio.output(led, False)
+
+
+# login_manager = LoginManager()
+# login_manager.init_app(app)
+# login_manager.session_protection = "strong"
 
 stop_threads = False
 lid = "03088ffc-1324-4ee1-ae59-a62c7fc63908"
 
-@login_manager.user_loader
-def load_user(user_id):
-    # TODO Chane to query data base kong mng either sql or no sql, this to store user info when already login
+# @login_manager.user_loader
+# def load_user(user_id):
+#     # TODO Chane to query data base kong mng either sql or no sql, this to store user info when already login
 
-    # mock up variable, need to be from checking with db
-    from db_struct.user import User
-    user_info = User
-    user_info.id = 12345678
-    user_info.name = "gunn"
-    user_info.username = "gnnchya"
-    user_info.email = "62011118@kmitl.ac.th"
-    user_info.password = "gnnchya"
+#     # mock up variable, need to be from checking with db
+#     from db_struct.user import User
+#     user_info = User
+#     user_info.id = 12345678
+#     user_info.name = "gunn"
+#     user_info.username = "gnnchya"
+#     user_info.email = "62011118@kmitl.ac.th"
+#     user_info.password = "gnnchya"
 
-    return user_info
-
-
-@app.route('/keptlock/user/login')
-def login_page():
-    if current_user.is_authenticated:
-        return redirect('http://127.0.0.1:8000/keptlock/locker')
-    return render_template('login.html')
+#     return user_info
 
 
-@app.route('/keptlock/user/login', methods=['POST'])
-def login_api():
-    if current_user.is_authenticated:
-        return redirect('http://127.0.0.1:8000/keptlock/locker')
-    username = request.form['username']
-    password = request.form['password']
+# @app.route('/keptlock/user/login')
+# def login_page():
+#     if current_user.is_authenticated:
+#         return redirect('http://127.0.0.1:8000/keptlock/locker')
+#     return render_template('login.html')
 
-    from db_struct.user import User
-    user_info_login = User(12345678, "gunn", "chai", "62011118@kmitl.ac.th", "0970047016", "gnnchya", "gnnchya", None, None, None)
 
-    # TODO Check the user and password in the database
-    # mock up variable, need to be from checking with db
-    user = True
-    checked_pass = True
+# @app.route('/keptlock/user/login', methods=['POST'])
+# def login_api():
+#     if current_user.is_authenticated:
+#         return redirect('http://127.0.0.1:8000/keptlock/locker')
+#     username = request.form['username']
+#     password = request.form['password']
 
-    # No username in the database
-    if not user:
-        flash('This username is not registered')
-        return redirect('http://127.0.0.1:8000/keptlock/user/login')
-    # wrong password
-    elif user and not checked_pass:
-        flash('Password is incorrect, Try again')
-        return redirect('http://127.0.0.1:8000/keptlock/user/login')
-    # login success
-    else:
-        login_user(user_info_login, remember=True)
-        return redirect('http://127.0.0.1:8000/keptlock/locker')
+#     from db_struct.user import User
+#     user_info_login = User(12345678, "gunn", "chai", "62011118@kmitl.ac.th", "0970047016", "gnnchya", "gnnchya", None, None, None)
+
+#     # TODO Check the user and password in the database
+#     # mock up variable, need to be from checking with db
+#     user = True
+#     checked_pass = True
+
+#     # No username in the database
+#     if not user:
+#         flash('This username is not registered')
+#         return redirect('http://127.0.0.1:8000/keptlock/user/login')
+#     # wrong password
+#     elif user and not checked_pass:
+#         flash('Password is incorrect, Try again')
+#         return redirect('http://127.0.0.1:8000/keptlock/user/login')
+#     # login success
+#     else:
+#         login_user(user_info_login, remember=True)
+#         return redirect('http://127.0.0.1:8000/keptlock/locker')
 
 
 # mode_selection api
 @app.route('/keptlock/mode')
-@login_required
+# @login_required
 def mode_page():
     # mock up data (UID of the locker account)
-    uid = 12345678
-    if uid != current_user.id:
-        flash("You trying to access other's locker!")
-        return redirect("http://127.0.0.1:8000/keptlock/locker#")
+    # uid = 12345678
+    # if uid != current_user.id:
+    #     flash("You trying to access other's locker!")
+    #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
 
     return render_template('index.html')
 
 
 @app.route('/keptlock/rfid')
-@login_required
+# @login_required
 def rfid_page():
     # mock up data (UID of the locker account)
-    uid = 12345678
-    if uid != current_user.id:
-        flash("You trying to access other's locker!")
-        return redirect("http://127.0.0.1:8000/keptlock/locker#")
+    # uid = 12345678
+    # if uid != current_user.id:
+    #     flash("You trying to access other's locker!")
+    #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
 
     from db_struct.locker import Locker
     locker = Locker(1234, "Pitsinee", "ABCDEFG", 3, 3, 1)
@@ -113,7 +127,7 @@ def rfid_page():
 
 
 @app.route('/keptlock/rfid', methods=['POST', 'PUT', 'GET', 'DELETE'])
-@login_required
+# @login_required
 def rfid_api():
     global stop_threads
 
@@ -160,10 +174,10 @@ def rfid_api():
                         break
 
     # mock up data (UID of the locker account)
-    uid = 12345678
-    if uid != current_user.id:
-        flash("You trying to access other's locker!")
-        return redirect("http://127.0.0.1:8000/keptlock/locker#")
+    # uid = 12345678
+    # if uid != current_user.id:
+    #     flash("You trying to access other's locker!")
+    #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
 
     from db_struct.locker import Locker
     locker = Locker(1234, "Pitsinee", "ABCDEFG", 3, 3, 1)
@@ -189,25 +203,25 @@ def rfid_api():
 
 
 @app.route('/keptlock/pin')
-@login_required
+# @login_required
 def pin_page():
     # mock up data (UID of the locker account)
-    uid = 12345678
-    if uid != current_user.id:
-        flash("You trying to access other's locker!")
-        return redirect("http://127.0.0.1:8000/keptlock/locker#")
+    # uid = 12345678
+    # if uid != current_user.id:
+    #     flash("You trying to access other's locker!")
+    #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
 
     return render_template('pin.html')
 
 
 @app.route('/keptlock/pin', methods=['POST', 'PUT', 'GET', 'DELETE'])
-@login_required
+# @login_required
 def pin_api():
     # mock up data (UID of the locker account)
-    uid = 12345678
-    if uid != current_user.id:
-        flash("You trying to access other's locker!")
-        return redirect("http://127.0.0.1:8000/keptlock/locker#")
+    # uid = 12345678
+    # if uid != current_user.id:
+    #     flash("You trying to access other's locker!")
+    #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
 
     if request.method == 'POST':
         pin = request.form['pin_enter']
