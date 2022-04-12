@@ -4,23 +4,20 @@ import os
 import time
 import threading
 import requests
+import RPi.GPIO as gpio
 
 template_dir = os.path.abspath('templates')
 static_dir = os.path.abspath('static')
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 
-led = 2
+
 
 global cap
 global videoWriter
 global camera_status
 
-gpio.setwarnings(False)
-gpio.cleanup()
-gpio.setmode(gpio.BCM)
-gpio.setup(led, gpio.OUT)
-gpio.output(led, False)
+
 
 
 # login_manager = LoginManager()

@@ -7,10 +7,9 @@ import time
 
 class Camera:
 
-    cap
-    videoWriter
-    camera_status
-
+    global cap
+    global videoWriter
+    global camera_status
 
     def start_record():
         global cap
