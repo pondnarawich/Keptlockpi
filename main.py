@@ -143,14 +143,16 @@ def rfid_api():
     def open_locker(slot_no):
         url = "http://127.0.0.1:8000/keptlock/locker/unlock/" + lid;
         timeout = time.time() + 60  # 1 minute
+        done = False
         if slot == "all":
             print("open all")
             status = [True, True, True]
             while True:
                 # TODO do something with the locker
                 print("open all")
-                if stop_threads or time.time() > timeout:
-                    if stop_threads:
+                # If RFID is authen then done = True
+                if stop_threads or time.time() > timeout or done:
+                    if done:
                         r = requests.post(url, data=status)
                         print(r.status_code, r.reason, r.content)
                         url_vid = "http://127.0.0.1:8000/keptlock/locker/video"
@@ -170,8 +172,9 @@ def rfid_api():
             while True:
                 # TODO do something with the locker
                 print("open slot#", slot_no)
-                if stop_threads or time.time() > timeout:
-                    if stop_threads:
+                # If RFID is authen then done = True
+                if stop_threads or time.time() > timeout or done:
+                    if done:
                         r = requests.post(url, data=status)
                         print(r.status_code, r.reason, r.content)
 
@@ -250,7 +253,15 @@ def pin_api():
             flash("Invalid pin or expired")
             return redirect("http://127.0.0.1:8000/keptlock/pin")
         else:
+            url = "http://127.0.0.1:8000/keptlock/locker/unlock/" + lid;
             print(pin, "open slot no.", slot)
+            status_now = [False, False, False]
+            status_now[slot - 1] = True
+            status = {"slots": status_now}
+
+            r = requests.post(url, data=status)
+            print(r.status_code, r.reason, r.content)
+
             # TODO open the slot
 
     return redirect("http://127.0.0.1:8000/keptlock/mode")
