@@ -1,21 +1,13 @@
 import RPi.GPIO as gpio
+from camera import *
+import _thread
 
 class ElectromagneticLock:
 
-    # cid
-    
-    led = 2
-
-    gpio.setwarnings(False)
-    gpio.cleanup()
-    gpio.setmode(gpio.BCM)
-    gpio.setup(led, gpio.OUT)
-    gpio.output(led, False)
-
-    def PinUnlock(pin, realpin, slot, locked):
+    def PinUnlock(self, pin, realpin, slot, locked):
         slot = led # remove when change to electromagnetic lock code
         if locked == True:
-            if pin == realpin
+            if pin == realpin:
                 gpio.output(slot,HIGH) #change to electromagnetic lock code
             else:
                 print("Incorrect pin code")
@@ -23,18 +15,23 @@ class ElectromagneticLock:
             print("The locker's status is unlocked")
 
     def GeneralUnlock(slot, locked):
-        slot = led # remove when change to electromagnetic lock code
+        # slot = led # remove when change to electromagnetic lock code
         if locked == True:
-            gpio.output(slot,HIGH) #change to electromagnetic lock code
+            gpio.output(slot, gpio.HIGH) #change to electromagnetic lock code
+            _thread.start_new_thread(Camera.start_record,())
+            while locked == True:
+                continue
+            Camera.stop_record()
         else:
             print("The locker's status is unlocked")
+        return
 
 
-    def RFIDUnlock(rfid, slot, locked):
+    def RFIDUnlock(self, rfid, slot, locked):
         slot = led # remove when change to electromagnetic lock code
         if locked == True:
             # insert rfid code
-            if rfid == cid
+            if rfid == cid:
                 gpio.output(slot,HIGH) #change to electromagnetic lock code
             else:
                 print("Incorrect card id for RFID")

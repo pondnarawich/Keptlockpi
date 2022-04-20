@@ -5,6 +5,9 @@ import time
 import threading
 import requests
 import RPi.GPIO as gpio
+from electromagneticlock import *
+import json
+
 
 template_dir = os.path.abspath('templates')
 static_dir = os.path.abspath('static')
@@ -17,8 +20,17 @@ global cap
 global videoWriter
 global camera_status
 
+global locked
+
+locked = True
 
 
+led = 2
+gpio.setwarnings(False)
+gpio.cleanup()
+gpio.setmode(gpio.BCM)
+gpio.setup(led, gpio.OUT)
+gpio.output(led, False)
 
 # login_manager = LoginManager()
 # login_manager.init_app(app)
@@ -245,6 +257,17 @@ def pin_api():
 
 
 # hading cache and error
+
+@app.route('/keptlock/unlock')
+def unlock_api():
+    ElectromagneticLock.GeneralUnlock(2,locked)
+    print('locker general unlock')
+    json_string = '''
+    {
+    "response": "locker general unlock"
+    } '''
+    return json.loads(json_string)
+
 
 @app.after_request
 def after_request(response):
