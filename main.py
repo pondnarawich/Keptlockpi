@@ -6,7 +6,10 @@ import threading
 import requests
 import RPi.GPIO as gpio
 from electromagneticlock import *
+from camera import *
 import json
+import _thread
+from read_card import *
 
 
 template_dir = os.path.abspath('templates')
@@ -14,30 +17,42 @@ static_dir = os.path.abspath('static')
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 
+elec_lock = [5,6,13]
+elec_lock_status = [0,1,2]
 
 
-global cap
-global videoWriter
-global camera_status
+# lock1_status = 2
+# lock2 = 13
+# lock3 = 19
+# lock4 = 26
 
-global locked
-
-locked = True
-
-
-led = 2
 gpio.setwarnings(False)
 gpio.cleanup()
 gpio.setmode(gpio.BCM)
-gpio.setup(led, gpio.OUT)
-gpio.output(led, False)
+# gpio.setup(lock1, gpio.OUT)
+# gpio.setup(lock2, gpio.OUT)
+# gpio.setup(lock3, gpio.OUT)
+# gpio.setup(lock4, gpio.OUT)
+# gpio.output(lock1, True)
+# gpio.output(lock2, True)
+# gpio.output(lock3, True)
+# gpio.output(lock4, True)
+# gpio.setup(lock1_status, gpio.IN)
+
+
+# led = 2
+# gpio.setwarnings(False)
+# gpio.cleanup()
+# gpio.setmode(gpio.BCM)
+# gpio.setup(led, gpio.OUT)
+# gpio.output(led, False)
 
 # login_manager = LoginManager()
 # login_manager.init_app(app)
 # login_manager.session_protection = "strong"
 
 stop_threads = False
-lid = "03088ffc-1324-4ee1-ae59-a62c7fc63908"
+lid = "95299d5b-5b9f-49fc-b8d9-f2b7e96190ba"
 
 # @login_manager.user_loader
 # def load_user(user_id):
@@ -199,16 +214,16 @@ def rfid_api():
                     print("open all slots")
                     x = threading.Thread(target=open_locker, args=("all",))
                     x.start()
-                    return redirect("http://127.0.0.1:8000/keptlock/rfid#popup"+ str(locker.size + 1))
+                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+ str(locker.size + 1))
                 else:
                     print("turn on slot no.", slot)
                     x = threading.Thread(target=open_locker, args=(slot,))
                     x.start()
-                    return redirect("http://127.0.0.1:8000/keptlock/rfid#popup"+slot)
+                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+slot)
             if key.startswith('cancel'):
                 stop_threads = True
-                return redirect("http://127.0.0.1:8000/keptlock/rfid#")
-    return redirect("http://127.0.0.1:8000/keptlock/rfid#")
+                return redirect("http://127.0.0.1:5000/keptlock/rfid#")
+    return redirect("http://127.0.0.1:5000/keptlock/rfid#")
 
 
 @app.route('/keptlock/pin')
@@ -236,7 +251,7 @@ def pin_api():
         pin = request.form['pin_enter']
 
         # TODO need testing
-        url = "http://127.0.0.1:8000/keptlock/locker/unlock/pin" + lid;
+        url = "http://127.0.0.1:5000/keptlock/locker/unlock/pin" + lid;
         code = {'code': pin}
         r = requests.post(url, data=code)
         print(r.status_code, r.reason, r.content)
@@ -248,25 +263,75 @@ def pin_api():
 
         if not pin_valid:
             flash("Invalid pin or expired")
-            return redirect("http://127.0.0.1:8000/keptlock/pin")
+            return redirect("http://127.0.0.1:5000/keptlock/pin")
         else:
             print(pin, "open slot no.", slot)
             # TODO open the slot
 
-    return redirect("http://127.0.0.1:8000/keptlock/mode")
+    return redirect("http://127.0.0.1:5000/keptlock/mode")
 
 
 # hading cache and error
 
-@app.route('/keptlock/unlock')
-def unlock_api():
-    ElectromagneticLock.GeneralUnlock(2,locked)
-    print('locker general unlock')
-    json_string = '''
-    {
-    "response": "locker general unlock"
-    } '''
+@app.route('/keptlock/unlock/<slot>')
+def unlock_api(slot):
+    slot = int(slot)
+    global camera_recorded
+    locked = is_lock(elec_lock_status[slot-1])
+    print(locked)
+    if locked == True:
+        _thread.start_new_thread(Start_record,())
+        camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
+        Stop_record()
+        json_string = '''
+        {
+        "response": "locker general unlock"
+        } '''
+    else:
+        print("locker is already unlock")
+        json_string = '''
+        {
+        "response": "locker is already unlock"
+        } '''
+
+    
     return json.loads(json_string)
+
+
+@app.route('/keptlock/unlock/rfid/<slot>')
+def rfid(slot):
+    is_owner = read_id()
+    if is_owner == True:
+        slot = int(slot)
+        global camera_recorded
+        locked = is_lock(elec_lock_status[slot-1])
+        print(locked)
+        if locked == True:
+            _thread.start_new_thread(Start_record,())
+            camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
+            Stop_record()
+            json_string = '''
+            {
+            "response": "locker rfid unlock"
+            } '''
+        else:
+            print("locker is already unlock")
+            json_string = '''
+            {
+            "response": "locker is already unlock"
+            } '''
+    else:
+        print("u are not the owner")
+        json_string = '''
+            {
+            "response": "u are not the owner"
+            } '''
+
+    
+    return json.loads(json_string)
+
+
+
 
 
 @app.after_request
@@ -283,7 +348,7 @@ def not_found(e):
 
 @app.errorhandler(401)
 def unauthorized(e):
-    return redirect('http://127.0.0.1:8000/keptlock/user/login')
+    return redirect('http://127.0.0.1:5000/keptlock/user/login')
 
 
 @app.template_filter()
@@ -305,4 +370,4 @@ if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
 
     app.debug = True
-    app.run(host='127.0.0.1', port=8000)
+    app.run(host='127.0.0.1', port=5000)

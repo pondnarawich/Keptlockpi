@@ -4,55 +4,72 @@ import numpy as np
 import _thread
 import datetime
 import time
+# import main
 
-class Camera:
+camera_recorded = True
+global cap
+global videoWriter
 
-    # global cap
-    # global videoWriter
-    # global camera_status
+# cap = cv.VideoCapture(0)
+# vid_cod = cv.VideoWriter_fourcc(*'XVID')
+# videoWriter = cv.VideoWriter('/home/pi/Desktop/video.avi',vid_cod, 30.0, (640,480))
 
-    def start_record():
-        global cap
-        global videoWriter
+def Start_record():
+    # cap = main.cap
+    # videoWriter = main.videoWriter
 
-        global camera_status
+    global cap
+    global videoWriter
+    global camera_recorded
 
-        tm = time.time()
 
-        t = str(tm)
+    tm = time.time()
 
-        camera_status = ''
+    t = str(tm)
 
-        cap = cv.VideoCapture(0)
-        vid_cod = cv.VideoWriter_fourcc(*'XVID')
-        videoWriter = cv.VideoWriter('/home/pi/Desktop/video'+t+'.avi',vid_cod, 30.0, (640,480))
 
-        if not cap.isOpened():
-            print("Cannot open camera")
-            exit()
-        while True:
-            # Capture frame-by-frame
-            ret, frame = cap.read()
-            # if frame is read correctly ret is True
-            if not ret:
-                print("Can't receive frame (stream end?). Exiting ...")
-                break
-            else:
-                cv.imshow('video', frame)
-                videoWriter.write(frame)
-            # Our operations on the frame come here
-            gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-            # Display the resulting frame
-            cv.imshow('frame', gray)
-            if camera_status == 'stop':
-                break
-        # When everything done, release the capture
+    cap = cv.VideoCapture(0)
+    vid_cod = cv.VideoWriter_fourcc(*'XVID')
+    videoWriter = cv.VideoWriter('/home/pi/Desktop/video'+t+'.avi',vid_cod, 30.0, (640,480))
 
-    def stop_record():
-        cap.release()
-        videoWriter.release()
-        cv.destroyAllWindows()
-        print('stop')
+    if not cap.isOpened():
+        print("Cannot open camera")
+        exit()
+    while True:
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+        # if frame is read correctly ret is True
+        if not ret:
+            print("Can't receive frame (stream end?). Exiting ...")
+            cap.release()
+            videoWriter.release()
+            cv.destroyAllWindows()
+            break
+        else:
+            cv.imshow('video', frame)
+            videoWriter.write(frame)
+        # Our operations on the frame come here
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        # Display the resulting frame
+        cv.imshow('frame', gray)
+        # print(camera_recorded)
+        if camera_recorded == False:
+            print('finished recorded')
+            cap.release()
+            videoWriter.release()
+            cv.destroyAllWindows()
+            
+            break
+    # When everything done, release the capture
+
+def Stop_record():
+    global cap
+    global videoWriter
+    global camera_recorded
+    cap.release()
+    videoWriter.release()
+    cv.destroyAllWindows()
+    print('stop')
 
 # val = ''
 # camera_status = ''

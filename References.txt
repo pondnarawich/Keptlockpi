@@ -1,0 +1,12 @@
+Pn532 with raspberry pi
+	-https://www.youtube.com/watch?v=AUlefK47L0s&t=329s
+	-https://blog.stigok.com/2017/10/12/setting-up-a-pn532-nfc-module-on-a-raspberry-pi-using-i2c.html
+
+
+Library
+	-https://github.com/HubCityLabs/py532lib
+
+
+Code
+	-https://stackoverflow.com/a/10415215/14499666
+	-https://dreamix.eu/blog/webothers/timeout-function-in-python-3
