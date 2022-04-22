@@ -28,8 +28,10 @@ def Start_record(vi_path):
     
     
     cap = cv.VideoCapture(0)
-    vid_cod = cv.VideoWriter_fourcc(*'XVID')
+    vid_cod = cv.VideoWriter_fourcc(*'MJPG')
+    # fourcc = cv.VideoWriter_fourcc(*'X264')
     videoWriter = cv.VideoWriter(vi_path,vid_cod, 30.0, (640,480))
+   
 
     if not cap.isOpened():
         print("Cannot open camera")

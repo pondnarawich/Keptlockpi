@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, flash, session, url_for
+from flask import Flask, request, render_template, redirect, flash, session, url_for, Response
 from flask_login import login_user, login_required, current_user, logout_user, LoginManager
 import os
 import time
@@ -11,6 +11,8 @@ import json
 import _thread
 from read_card import *
 from flask import jsonify
+from flask import send_file
+from subprocess import call 
 
 
 template_dir = os.path.abspath('templates')
@@ -53,7 +55,7 @@ gpio.setmode(gpio.BCM)
 # login_manager.session_protection = "strong"
 
 stop_threads = False
-lid = "95299d5b-5b9f-49fc-b8d9-f2b7e96190ba"
+lid = "9f45f467-8ded-4316-8229-3f0d311269ec"
 
 # @login_manager.user_loader
 # def load_user(user_id):
@@ -260,14 +262,7 @@ def pin_api():
             flash("Invalid pin or expired")
             return redirect("http://127.0.0.1:5000/keptlock/pin")
         else:
-            url = "http://127.0.0.1:8000/keptlock/locker/unlock/" + lid;
-            print(pin, "open slot no.", slot)
-            status_now = [False, False, False]
-            status_now[slot - 1] = True
-            status = {"slots": status_now}
-
-            r = requests.post(url, data=status)
-            print(r.status_code, r.reason, r.content)
+            return unlock_api()
 
             # TODO open the slot
 
@@ -278,35 +273,41 @@ def pin_api():
 
 @app.route('/keptlock/unlock/<slot>')
 def unlock_api(slot):
+    response = Response()
     slot = int(slot)
     print(slot)
     global camera_recorded
     locked = is_lock(elec_lock_status[slot-1])
     print(locked)
     if locked == True:
-        tm = time.time()
-        t = str(tm)
-        vi_path='/home/pi/Desktop/video'+t+'.avi'
+        t = str(int(time.time()))
+        vi_name = 'video'+t
+        file_type = '.avi'
+        vi_path='/home/pi/Desktop/'+vi_name+file_type
         x = threading.Thread(target=Start_record, args=(vi_path,))
         x.start()
         camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
         Stop_record()
-        
-        url_vid = "http://127.0.0.1:8000/keptlock/locker/video"
-        files = [('vid1', (vi_path, open(vi_path, 'rb'), 'video/avi')) , ('vid2', (vi_path, open(vi_path, 'rb'), 'video/avi'))]
-        data = {"lid": lid, "slot": slot}
-        r = requests.post(url_vid, data=data, files=files)
-        print(r.status_code, r.reason, r.content)
+
+        status = is_lock(elec_lock_status[slot-1])
+        if status == True:
+            status = False
+        else:
+            status=True
+        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(status), 'vi_name': vi_name}
+
     else:
         print("locker is already unlock")
+        data = "locker is already unlock"
+    
+    return jsonify(data)
 
-    status = is_lock(elec_lock_status[slot-1])
-    if status == True:
-        status = False
-    else:
-        status=True
-    print(status)
-    return jsonify(status)
+
+@app.route('/keptlock/video')
+def video_api():
+    vi_path = request.form['vi_path']
+    return send_file(vi_path,mimetype='video/avi')
+
 
 
 @app.route('/keptlock/unlock/rfid/<slot>')

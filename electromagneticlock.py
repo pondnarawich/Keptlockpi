@@ -43,7 +43,7 @@ def GeneralUnlock(slot, slot_status):
             cnt = 0
             break
         print(locked_status)
-        time.sleep(1)
+        time.sleep(0.1)
     print('unlock', slot)
     return False
 
@@ -56,7 +56,7 @@ def is_lock(slot_status):
         if locked_status == 1 or locked_status == 0:
             cnt += 1
         print(locked_status)
-        time.sleep(1)
+        time.sleep(0.1)
     if cnt == 5:
         return True
     else:
