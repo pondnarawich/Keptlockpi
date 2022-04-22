@@ -15,11 +15,12 @@ import time
 #     return False
 
 def read_id():
+    global stop_threads
     pn532 = Pn532_i2c()
     pn532.SAMconfigure()
 
     print('Waiting for the card')
-    for i in range(0,10):
+    for i in range(0,60):
         card_id = pn532.read_mifare().get_data()
         # return_dict['detect'] = True
         if (card_id == bytearray(b'K\x01\x01\x00\x04\x08\x04G\x83\xf9\xd7'))\
@@ -27,6 +28,9 @@ def read_id():
 
             print('Unlock')
             return True
+        elif stop_threads:
+            print('Cancel')
+            return False
 
         else:
 

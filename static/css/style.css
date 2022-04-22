@@ -688,6 +688,7 @@ section{
   height:10rem;
   display: inline-flex;
   gap: 1rem;
+
   
 }
 .rfid .container .blocks .block{
@@ -721,6 +722,8 @@ section{
   text-align: center;
 /*   padding-top: 0.5rem; */
   font-size: 3rem;
+  cursor: pointer;
+  padding-top: 1rem;
 }
 
 .rfid .container .numpad .block:hover{

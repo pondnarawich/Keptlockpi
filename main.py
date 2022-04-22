@@ -122,7 +122,7 @@ def mode_page():
     return render_template('index.html')
 
 
-@app.route('/keptlock/rfid')
+@app.route('/keptlock/rfid', methods=['GET'])
 # @login_required
 def rfid_page():
     # mock up data (UID of the locker account)
@@ -130,69 +130,45 @@ def rfid_page():
     # if uid != current_user.id:
     #     flash("You trying to access other's locker!")
     #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
-    slots = []
+    slots_stat = []
+    for i in range(3):
+        locked = is_lock(elec_lock_status[i])
+        if locked == True:
+            temp = False
+        else:
+            temp = True
+        slots_stat.append(temp)
 
     count = 0
-    for slot in slots:
-        if slot.opened:
+    for stat in slots_stat:
+        if not stat:
             count += 1
 
-    open_all_allow = True
+    open_all_allow = False
     if count == 3:
-        open_all_allow = False
+        open_all_allow = True
 
-    return render_template('rfid.html', slots=slots, open_all_allow=open_all_allow)
+    return render_template('rfid.html', slots=slots_stat, open_all_allow=open_all_allow)
 
 
-@app.route('/keptlock/rfid', methods=['POST', 'PUT', 'GET', 'DELETE'])
+@app.route('/keptlock/rfid', methods=['POST', 'PUT', 'DELETE'])
 # @login_required
 def rfid_api():
     global stop_threads
 
-    def open_locker(slot_no):
-        url = "http://127.0.0.1:8000/keptlock/locker/unlock/" + lid;
-        timeout = time.time() + 60  # 1 minute
-        done = False
-        if slot == "all":
-            print("open all")
-            status = [True, True, True]
-            while True:
-                # TODO do something with the locker
-                print("open all")
-                # If RFID is authen then done = True
-                if stop_threads or time.time() > timeout or done:
-                    if done:
-                        r = requests.post(url, data=status)
-                        print(r.status_code, r.reason, r.content)
-                        url_vid = "http://127.0.0.1:8000/keptlock/locker/video"
-
-                        for i in range(3):
-                            files = {'vid1': open('PATHHHHHHHHHHH', 'rb'), 'vid2': open('PATHHHHHHHHHHH', 'rb')}
-                            data = {"lid": lid, "slot": i}
-                            r = requests.post(url_vid, data=data, files=files)
-                            print(r.status_code, r.reason, r.content)
-
-                        break
-        else:
-            print("open slot#", slot_no)
-            status_now = [False, False, False]
-            status_now[slot_no-1] = True
-            status = {"slots": status_now}
-            while True:
-                # TODO do something with the locker
-                print("open slot#", slot_no)
-                # If RFID is authen then done = True
-                if stop_threads or time.time() > timeout or done:
-                    if done:
-                        r = requests.post(url, data=status)
-                        print(r.status_code, r.reason, r.content)
-
-                        url_vid = "http://127.0.0.1:8000/keptlock/locker/video"
-                        files = {'vid1': open('PATHHHHHHHHHHH22', 'rb'), 'vid2': open('PATHHHHHHHHHHH', 'rb')}
-                        data = {"lid": lid, "slot": slot_no}
-                        r = requests.post(url_vid, data=data, files=files)
-                        print(r.status_code, r.reason, r.content)
-                        break
+    def open_by_rfid(slot):
+        is_owner = read_id()
+        if is_owner == True:
+            op = unlock_api(slot)
+            my_bytes_value = op.data
+            my_json = my_bytes_value.decode('utf8').replace("'", '"')
+            data = json.loads(my_json)
+            s = json.dumps(data, indent=4, sort_keys=True)
+            print(data)
+            url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
+            r = requests.post(url, data=data)
+        return
+                    
 
     # mock up data (UID of the locker account)
     # uid = 12345678
@@ -207,19 +183,22 @@ def rfid_api():
         for key in request.form:
             if key.startswith('open.'):
                 slot = key.partition('.')[-1]
+                print(slot)
                 if slot == "all":
                     print("open all slots")
-                    x = threading.Thread(target=open_locker, args=("all",))
+                    x = threading.Thread(target=open_by_rfid, args=(1,))
                     x.start()
                     return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+ str(locker.size + 1))
                 else:
                     print("turn on slot no.", slot)
-                    x = threading.Thread(target=open_locker, args=(slot,))
-                    x.start()
+                    # x = threading.Thread(target=rfid, args=(slot,))
+                    # x.start()
+                    open_by_rfid(slot)
                     return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+slot)
             if key.startswith('cancel'):
                 stop_threads = True
-                return redirect("http://127.0.0.1:5000/keptlock/rfid#")
+                print('Cancel na ja')
+                return redirect("http://127.0.0.1:5000/keptlock/mode")
     return redirect("http://127.0.0.1:5000/keptlock/rfid#")
 
 
@@ -245,15 +224,13 @@ def pin_api():
     #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
 
     if request.method == 'POST':
-        pin = request.form['pin_enter']
+        pin = request.form['pin_here']
 
         # TODO need testing
-        url = "http://127.0.0.1:5000/keptlock/locker/unlock/pin" + lid;
+        url = 'http://0.0.0.0:8000/keptlock/locker/unlock/validate/pin/' + lid
         code = {'code': pin}
-        r = requests.post(url, data=code)
-        print(r.status_code, r.reason, r.content)
-
-        slot = int(r.content)
+        r = requests.get(url, data=code)
+        slot = int(r.json()['slot'])
         pin_valid = False
         if r.status_code == 200:
             pin_valid = True
@@ -262,7 +239,18 @@ def pin_api():
             flash("Invalid pin or expired")
             return redirect("http://127.0.0.1:5000/keptlock/pin")
         else:
-            return unlock_api()
+            op = unlock_api(slot)
+            my_bytes_value = op.data
+            my_json = my_bytes_value.decode('utf8').replace("'", '"')
+            data = json.loads(my_json)
+            s = json.dumps(data, indent=4, sort_keys=True)
+            url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
+            r = requests.post(url, data=data)
+            # files = {'upload_file': (str(data['vi_name'])+'avi', open(str(data['vi_path']),'rb'), 'video/avi')}
+            # url = 'http://0.0.0.0:8000/keptlock/locker/video/' + str(data['lid'])
+            # r = requests.post(url, files=files, data=data)
+
+            return redirect("http://127.0.0.1:5000/keptlock/mode")
 
             # TODO open the slot
 
@@ -270,6 +258,14 @@ def pin_api():
 
 
 # hading cache and error
+
+# for server to request the slot lock status
+# @app.route('/keptlock/update/status/all')
+# def update_status_api():
+#     for i in 3
+
+# input pin - update db
+
 
 @app.route('/keptlock/unlock/<slot>')
 def unlock_api(slot):
@@ -294,7 +290,7 @@ def unlock_api(slot):
             status = False
         else:
             status=True
-        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(status), 'vi_name': vi_name}
+        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(status), 'vi_name': str(vi_name)}
 
     else:
         print("locker is already unlock")
@@ -314,33 +310,14 @@ def video_api():
 def rfid(slot):
     is_owner = read_id()
     if is_owner == True:
-        slot = int(slot)
-        global camera_recorded
-        locked = is_lock(elec_lock_status[slot-1])
-        print(locked)
-        if locked == True:
-            _thread.start_new_thread(Start_record,())
-            camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
-            Stop_record()
-            json_string = '''
-            {
-            "response": "locker rfid unlock"
-            } '''
-        else:
-            print("locker is already unlock")
-            json_string = '''
-            {
-            "response": "locker is already unlock"
-            } '''
-    else:
-        print("u are not the owner")
-        json_string = '''
-            {
-            "response": "u are not the owner"
-            } '''
-
-    
-    return json.loads(json_string)
+        op = unlock_api(slot)
+        my_bytes_value = op.data
+        my_json = my_bytes_value.decode('utf8').replace("'", '"')
+        data = json.loads(my_json)
+        s = json.dumps(data, indent=4, sort_keys=True)
+        url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
+        r = requests.post(url, data=data)
+    return
 
 
 

@@ -51,29 +51,29 @@
         <div class="block"></div>
       </div>
 
-      <form>
+      <form method="post">
         <div class="pinBox">
-          <input id="pin_here" class="pinEntry" type="text" maxlength="6"/>
+          <input id="pin_here" name="pin_here" class="pinEntry" type="text" maxlength="6"/>
         </div>
-      </form>
+
       
       
       <div class="numpad">
-        <button class="block" onclick="Add_pin(1)">1</button>
-        <button class="block" onclick="Add_pin(2)">2</button>
-        <button class="block" onclick="Add_pin(3)">3</button>
+        <a class="block" onclick="Add_pin(1)">1</a>
+        <a class="block" onclick="Add_pin(2)">2</a>
+        <a class="block" onclick="Add_pin(3)">3</a>
 
-        <button class="block" onclick="Add_pin(4)">4</button>
-        <button class="block" onclick="Add_pin(5)">5</button>
-        <button class="block" onclick="Add_pin(6)">6</button>
+        <a class="block" onclick="Add_pin(4)">4</a>
+        <a class="block" onclick="Add_pin(5)">5</a>
+        <a class="block" onclick="Add_pin(6)">6</a>
 
-        <button class="block" onclick="Add_pin(7)">7</button>
-        <button class="block" onclick="Add_pin(8)">8</button>
-        <button class="block" onclick="Add_pin(9)">9</button>
+        <a class="block" onclick="Add_pin(7)">7</a>
+        <a class="block" onclick="Add_pin(8)">8</a>
+        <a class="block" onclick="Add_pin(9)">9</a>
 
-        <button class="block" onclick="Delete()"> <div class="fas fa-delete-left" ></div></button>
-        <button class="block" onclick="Add_pin(0)">0</button>
-        <form method="post">
+        <a class="block" onclick="Delete()"> <div class="fas fa-delete-left" ></div></a>
+        <a class="block" onclick="Add_pin(0)">0</a>
+
         <input class="block" type="submit" value="enter" name="pin_enter"/>
         </form>
       </div>
