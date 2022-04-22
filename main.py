@@ -10,6 +10,7 @@ from camera import *
 import json
 import _thread
 from read_card import *
+from flask import jsonify
 
 
 template_dir = os.path.abspath('templates')
@@ -127,16 +128,7 @@ def rfid_page():
     # if uid != current_user.id:
     #     flash("You trying to access other's locker!")
     #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
-
-    from db_struct.locker import Locker
-    locker = Locker(1234, "Pitsinee", "ABCDEFG", 3, 3, 1)
-
-    from db_struct.slot import Slot
-    slot1 = Slot(1, False)
-    slot2 = Slot(1, False)
-    slot3 = Slot(1, True)
-
-    slots = [slot1, slot2, slot3]
+    slots = []
 
     count = 0
     for slot in slots:
@@ -144,10 +136,10 @@ def rfid_page():
             count += 1
 
     open_all_allow = True
-    if count == locker.size:
+    if count == 3:
         open_all_allow = False
 
-    return render_template('rfid.html', locker=locker, slots=slots, open_all_allow=open_all_allow)
+    return render_template('rfid.html', slots=slots, open_all_allow=open_all_allow)
 
 
 @app.route('/keptlock/rfid', methods=['POST', 'PUT', 'GET', 'DELETE'])
@@ -287,26 +279,34 @@ def pin_api():
 @app.route('/keptlock/unlock/<slot>')
 def unlock_api(slot):
     slot = int(slot)
+    print(slot)
     global camera_recorded
     locked = is_lock(elec_lock_status[slot-1])
     print(locked)
     if locked == True:
-        _thread.start_new_thread(Start_record,())
+        tm = time.time()
+        t = str(tm)
+        vi_path='/home/pi/Desktop/video'+t+'.avi'
+        x = threading.Thread(target=Start_record, args=(vi_path,))
+        x.start()
         camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
         Stop_record()
-        json_string = '''
-        {
-        "response": "locker general unlock"
-        } '''
+        
+        url_vid = "http://127.0.0.1:8000/keptlock/locker/video"
+        files = [('vid1', (vi_path, open(vi_path, 'rb'), 'video/avi')) , ('vid2', (vi_path, open(vi_path, 'rb'), 'video/avi'))]
+        data = {"lid": lid, "slot": slot}
+        r = requests.post(url_vid, data=data, files=files)
+        print(r.status_code, r.reason, r.content)
     else:
         print("locker is already unlock")
-        json_string = '''
-        {
-        "response": "locker is already unlock"
-        } '''
 
-    
-    return json.loads(json_string)
+    status = is_lock(elec_lock_status[slot-1])
+    if status == True:
+        status = False
+    else:
+        status=True
+    print(status)
+    return jsonify(status)
 
 
 @app.route('/keptlock/unlock/rfid/<slot>')

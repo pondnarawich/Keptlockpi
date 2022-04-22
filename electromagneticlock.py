@@ -51,13 +51,13 @@ def GeneralUnlock(slot, slot_status):
 def is_lock(slot_status):
     global spi
     cnt = 0
-    for i in range(0,6):
+    for i in range(5):
         locked_status = adc_convert(slot_status)
         if locked_status == 1 or locked_status == 0:
             cnt += 1
         print(locked_status)
         time.sleep(1)
-    if cnt >= 5:
+    if cnt == 5:
         return True
     else:
         return False

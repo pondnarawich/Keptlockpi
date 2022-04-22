@@ -9,12 +9,15 @@ import time
 camera_recorded = True
 global cap
 global videoWriter
+global vi_path
 
+vi_path=''
 # cap = cv.VideoCapture(0)
 # vid_cod = cv.VideoWriter_fourcc(*'XVID')
 # videoWriter = cv.VideoWriter('/home/pi/Desktop/video.avi',vid_cod, 30.0, (640,480))
 
-def Start_record():
+
+def Start_record(vi_path):
     # cap = main.cap
     # videoWriter = main.videoWriter
 
@@ -22,15 +25,11 @@ def Start_record():
     global videoWriter
     global camera_recorded
 
-
-    tm = time.time()
-
-    t = str(tm)
-
-
+    
+    
     cap = cv.VideoCapture(0)
     vid_cod = cv.VideoWriter_fourcc(*'XVID')
-    videoWriter = cv.VideoWriter('/home/pi/Desktop/video'+t+'.avi',vid_cod, 30.0, (640,480))
+    videoWriter = cv.VideoWriter(vi_path,vid_cod, 30.0, (640,480))
 
     if not cap.isOpened():
         print("Cannot open camera")
@@ -40,7 +39,7 @@ def Start_record():
         ret, frame = cap.read()
         # if frame is read correctly ret is True
         if not ret:
-            print("Can't receive frame (stream end?). Exiting ...")
+            print("Can't receive frame (stream end?). Exiting ...", vi_path)
             cap.release()
             videoWriter.release()
             cv.destroyAllWindows()
