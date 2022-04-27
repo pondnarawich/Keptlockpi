@@ -41,7 +41,7 @@
             {% for slot in slots %}
               {% set count.value = count.value + 1 %}
               {% if not slot %}
-                <input type="submit" class="can" value="Open Slot #{{count.value}}" name="open.{{count.value}}" />
+                <input type="submit" class="can" value="Open Slot #{{count.value}}" name="open.{{count.value}}" id="open.{{count.value}}"/>
               {% else %}
               {% if slot%}
                <input class="cannot" value="Slot #{{count.value}} is opened" name="open.{{count.value}}" disabled/>
@@ -53,7 +53,7 @@
             {% if not open_all_allow %}
               <input class="cannot" value="All slot are already opened" disabled/>
             {% else %}
-              <input type="submit" class="can" value="Open all slots" name="open.all"/>
+              <input type="submit" class="can" value="Open all slots" name="open.all" id="open.all"/>
             {% endif %}
 
           </form>
@@ -109,10 +109,25 @@
 
     }, 1000);
 
-
-
-
   </script>
+
+    <script type="text/javascript">
+        for (let i = 0; i < 5; i++) {
+            if (i == 4){
+                 document.getElementById("open.all").onclick = function () {
+                location.href = "http://127.0.0.1:5000/keptlock/rfid#popupall";
+            }else{
+                document.getElementById("open." + new String(i)).onclick = function () {
+                location.href = "http://127.0.0.1:5000/keptlock/rfid#popup" + new String(i);
+
+            }
+
+
+        };
+
+
+    };
+    </script>
 
     
     </section>
