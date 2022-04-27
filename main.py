@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, flash, session, url_for, Response, session
+from flask import Flask, request, render_template, redirect, flash, session, url_for, Response
 from flask_login import login_user, login_required, current_user, logout_user, LoginManager
 import os
 import time
@@ -22,7 +22,8 @@ app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 elec_lock = [5,6,13]
 elec_lock_status = [0,1,2]
-
+rfid_slots = [1,2,3]
+rfid_slot = 0
 
 # lock1_status = 2
 # lock2 = 13
@@ -125,17 +126,18 @@ def mode_page():
 @app.route('/keptlock/rfid', methods=['GET'])
 # @login_required
 def rfid_page():
-    if session['slot'] == 'first':
-        
-        slot = session['slot']
+    global rfid_slot
+    global rfid_slots
+    if rfid_slot in rfid_slots:
         print('slot from rfid page')
-        op = unlock_api(slot)
+        op = unlock_api(rfid_slot)
         my_bytes_value = op.data
         my_json = my_bytes_value.decode('utf8').replace("'", '"')
         data = json.loads(my_json)
         s = json.dumps(data, indent=4, sort_keys=True)
         url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
         r = requests.post(url, data=data)
+        rfid_slot = 0
     # mock up data (UID of the locker account)
     # uid = 12345678
     # if uid != current_user.id:
@@ -167,6 +169,7 @@ def rfid_page():
 def rfid_api():
     session.clear()
     global stop_threads
+    global rfid_slot
 
     def open_by_rfid(slot):
         x = threading.Thread(target=rfid, args=(slot,))
@@ -186,19 +189,19 @@ def rfid_api():
     if request.method == 'POST':
         for key in request.form:
             if key.startswith('open.'):
-                slot = key.partition('.')[-1]
-                session['slot'] = 1
-                if slot == "all":
+                rfid_slot = key.partition('.')[-1]
+                if rfid_slot == "all":
                     print("open all slots")
-                    x = threading.Thread(target=rfid, args=(1,))
-                    x.start()
+                    open_by_rfid(rfid_slot)
+                    # x = threading.Thread(target=rfid, args=(rfid_slot,))
+                    # x.start()
                     return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+ str(locker.size + 1))
                 else:
-                    print("turn on slot no.", slot)
-                    x = threading.Thread(target=rfid, args=(slot,))
+                    print("turn on slot no.", rfid_slot)
+                    x = threading.Thread(target=rfid, args=(rfid_slot,))
                     x.start()
                     # open_by_rfid(slot)
-                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+slot)
+                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+rfid_slot)
             if key.startswith('cancel'):
                 stop_threads = True
                 print('Cancel na ja')
@@ -312,6 +315,8 @@ def video_api():
 
 @app.route('/keptlock/unlock/rfid/<slot>')
 def rfid(slot):
+    global stop_threads
+    stop_threads = True
     return read_id()
 # def rfid(slot):
 #     is_owner = read_id()
