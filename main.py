@@ -196,23 +196,13 @@ def rfid_api():
         for key in request.form:
             if key.startswith('open.'):
                 rfid_slot = key.partition('.')[-1]
-                if rfid_slot == "all":
-                    print("open all slots")
-                    open_by_rfid()
-                    # x = threading.Thread(target=rfid, args=(rfid_slot,))
-                    # x.start()
-                    return redirect("http://127.0.0.1:5000/keptlock/#popup"+ str(locker.size + 1))
-                else:
-                    print("turn on slot no.", rfid_slot)
-                    x = threading.Thread(target=open_by_rfid, args=())
-                    x.start()
-                    # open_by_rfid(slot)
-                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup" + rfid_slot)
+                open_by_rfid()
+                return redirect("http://127.0.0.1:5000/keptlock/rfid#")
             if key.startswith('cancel'):
                 stop_threads = True
                 print('Cancel na ja')
                 return redirect("http://127.0.0.1:5000/keptlock/mode")
-    return redirect("http://127.0.0.1:5000/keptlock/rfid#")
+    return redirect("http://127.0.0.1:5000/keptlock/rfid#" + rfid_slot)
 
 
 @app.route('/keptlock/pin')
