@@ -24,6 +24,7 @@ elec_lock = [5,6,13]
 elec_lock_status = [0,1,2]
 rfid_slots = [1,2,3]
 rfid_slot = 0
+stop_threads = False
 
 # lock1_status = 2
 # lock2 = 13
@@ -168,13 +169,18 @@ def rfid_page():
 # @login_required
 def rfid_api():
     session.clear()
+    global stop_threads
     # global stop_threads
     global rfid_slot
+    stop_threads = False
+    rfid_status = False
 
-    def open_by_rfid(slot):
-        rfid_status = rfid(slot)
+    def open_by_rfid():
+        global rfid_status
+        rfid_status = read_id()
         stop_threads = True
-        return rfid_status
+        print("RFID is already unlock")
+        return
                     
 
     # mock up data (UID of the locker account)
@@ -192,20 +198,20 @@ def rfid_api():
                 rfid_slot = key.partition('.')[-1]
                 if rfid_slot == "all":
                     print("open all slots")
-                    open_by_rfid(rfid_slot)
+                    open_by_rfid()
                     # x = threading.Thread(target=rfid, args=(rfid_slot,))
                     # x.start()
-                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+ str(locker.size + 1))
+                    return redirect("http://127.0.0.1:5000/keptlock/#popup"+ str(locker.size + 1))
                 else:
                     print("turn on slot no.", rfid_slot)
-                    x = threading.Thread(target=open_by_rfid, args=(rfid_slot,))
+                    x = threading.Thread(target=open_by_rfid, args=())
                     x.start()
                     # open_by_rfid(slot)
-                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup"+rfid_slot)
+                    return redirect("http://127.0.0.1:5000/keptlock/rfid#popup" + rfid_slot)
             if key.startswith('cancel'):
                 stop_threads = True
                 print('Cancel na ja')
-                return redirect("http://127.0.0.1:5000/keptlock/rfid#")
+                return redirect("http://127.0.0.1:5000/keptlock/mode")
     return redirect("http://127.0.0.1:5000/keptlock/rfid#")
 
 

@@ -15,7 +15,6 @@ import time
 #     return False
 
 def read_id():
-    global stop_threads
     pn532 = Pn532_i2c()
     pn532.SAMconfigure()
 
@@ -28,9 +27,6 @@ def read_id():
 
             print('Unlock')
             return True
-        elif stop_threads:
-            print('Cancel')
-            return False
 
         else:
 
