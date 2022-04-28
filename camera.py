@@ -17,18 +17,16 @@ vi_path=''
 # videoWriter = cv.VideoWriter('/home/pi/Desktop/video.avi',vid_cod, 30.0, (640,480))
 
 
-def Start_record(vi_path):
+def Start_record(vi_path,camera_slot):
     # cap = main.cap
     # videoWriter = main.videoWriter
 
     global cap
     global videoWriter
     global camera_recorded
-
     
-    
-    cap = cv.VideoCapture(0)
-    vid_cod = cv.VideoWriter_fourcc(*'MJPG')
+    cap = cv.VideoCapture(camera_slot)
+    vid_cod = cv.VideoWriter_fourcc(*'XVID')
     # fourcc = cv.VideoWriter_fourcc(*'X264')
     videoWriter = cv.VideoWriter(vi_path,vid_cod, 30.0, (640,480))
    

@@ -22,9 +22,9 @@ app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 elec_lock = [5,6,13]
 elec_lock_status = [0,1,2]
-rfid_slots = [1,2,3]
-rfid_slot = 0
 stop_threads = False
+camera_slot = [0, 2, 4]
+main_camera = 6
 
 # lock1_status = 2
 # lock2 = 13
@@ -127,18 +127,6 @@ def mode_page():
 @app.route('/keptlock/rfid', methods=['GET'])
 # @login_required
 def rfid_page():
-    global rfid_slot
-    global rfid_slots
-    if rfid_slot in rfid_slots:
-        print('slot from rfid page')
-        op = unlock_api(rfid_slot)
-        my_bytes_value = op.data
-        my_json = my_bytes_value.decode('utf8').replace("'", '"')
-        data = json.loads(my_json)
-        s = json.dumps(data, indent=4, sort_keys=True)
-        url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
-        r = requests.post(url, data=data)
-        rfid_slot = 0
     # mock up data (UID of the locker account)
     # uid = 12345678
     # if uid != current_user.id:
@@ -197,6 +185,13 @@ def rfid_api():
             if key.startswith('open.'):
                 rfid_slot = key.partition('.')[-1]
                 open_by_rfid()
+                op = unlock_slot(rfid_slot)
+                my_bytes_value = op.data
+                my_json = my_bytes_value.decode('utf8').replace("'", '"')
+                data = json.loads(my_json)
+                s = json.dumps(data, indent=4, sort_keys=True)
+                url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
+                r = requests.post(url, data=data)
                 return redirect("http://127.0.0.1:5000/keptlock/rfid#")
             if key.startswith('cancel'):
                 stop_threads = True
@@ -276,6 +271,24 @@ def unlock_api(slot):
     slot = int(slot)
     print(slot)
     global camera_recorded
+    t = str(int(time.time()))
+    vi_name = 'video'+t
+    file_type = '.avi'
+    vi_path='/home/pi/Desktop/'+vi_name+file_type
+    x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot-1],))
+    x.start()
+    camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
+    Stop_record()
+
+    data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(False), 'vi_name': str(vi_name)}
+    return jsonify(data)
+
+
+def unlock_slot(slot):
+    response = Response()
+    slot = int(slot)
+    print(slot)
+    global camera_recorded
     locked = is_lock(elec_lock_status[slot-1])
     print(locked)
     if locked == True:
@@ -283,17 +296,12 @@ def unlock_api(slot):
         vi_name = 'video'+t
         file_type = '.avi'
         vi_path='/home/pi/Desktop/'+vi_name+file_type
-        x = threading.Thread(target=Start_record, args=(vi_path,))
+        x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot-1]))
         x.start()
         camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
         Stop_record()
 
-        status = is_lock(elec_lock_status[slot-1])
-        if status == True:
-            status = False
-        else:
-            status=True
-        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(status), 'vi_name': str(vi_name)}
+        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(False), 'vi_name': str(vi_name)}
 
     else:
         print("locker is already unlock")

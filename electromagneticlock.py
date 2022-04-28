@@ -34,16 +34,16 @@ def GeneralUnlock(slot, slot_status):
     # print(locked_status)
     while True:
         locked_status = adc_convert(slot_status)
-        if locked_status == 1 or locked_status == 0:
+        if locked_status < 10:
             cnt += 1
         else:
             cnt = 0    
             # print(locked_status)
-        if cnt >= 10:
+        if cnt >= 20:
             cnt = 0
             break
         print(locked_status)
-        time.sleep(0.1)
+        time.sleep(0.2)
     print('unlock', slot)
     return False
 
@@ -51,13 +51,13 @@ def GeneralUnlock(slot, slot_status):
 def is_lock(slot_status):
     global spi
     cnt = 0
-    for i in range(5):
+    for i in range(10):
         locked_status = adc_convert(slot_status)
-        if locked_status == 1 or locked_status == 0:
+        if locked_status < 10:
             cnt += 1
         print(locked_status)
-        time.sleep(0.1)
-    if cnt == 5:
+        time.sleep(0.2)
+    if cnt >= 10:
         return True
     else:
         return False
