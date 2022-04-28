@@ -23,8 +23,7 @@ app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 elec_lock = [5,6,13]
 elec_lock_status = [0,1,2]
 stop_threads = False
-camera_slot = [0, 2, 4]
-main_camera = 6
+camera_slot = ["/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0"]
 
 # lock1_status = 2
 # lock2 = 13
@@ -275,7 +274,7 @@ def unlock_api(slot):
     vi_name = 'video'+t
     file_type = '.avi'
     vi_path='/home/pi/Desktop/'+vi_name+file_type
-    x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot-1],))
+    x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot],))
     x.start()
     camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
     Stop_record()
@@ -296,7 +295,7 @@ def unlock_slot(slot):
         vi_name = 'video'+t
         file_type = '.avi'
         vi_path='/home/pi/Desktop/'+vi_name+file_type
-        x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot-1]))
+        x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot]))
         x.start()
         camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
         Stop_record()
