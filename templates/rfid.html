@@ -19,7 +19,7 @@
   
   
   <body id="light_navy">
-     <header class="header">
+     <header class="header"  id="home">
       <a class="logo"> Kept-lock </a>
     </header> 
 
@@ -32,57 +32,41 @@
         </div>
       </div></a>
       
-       <div class="locker" >
+       <div class="locker">
           
-          <form class="open" method="post">
+          <div class="open" method="post">
               <h2>Select the slot</h2>
 
             {% set count = namespace(value=0) %}
             {% for slot in slots %}
               {% set count.value = count.value + 1 %}
               {% if not slot %}
-                <input type="submit" class="can" value="Open Slot #{{count.value}}" name="open.{{count.value}}" onclick="document.getElementById('popup'+ new String(count.value)).style.visibility = 'visible'; "/>
+                <a class="can" value="Open Slot #{{count.value}}" name="open.{{count.value}}" id="open.{{count.value}}" >Open Slot #{{count.value}}</a>
               {% else %}
               {% if slot%}
-               <input class="cannot" value="Slot #{{count.value}} is opened" name="open.{{count.value}}" disabled/>
+               <a class="cannot" value="Slot #{{count.value}} is opened" name="open.{{count.value}}" disabled>Slot #{{count.value}} is opened</a>
               {% endif %}
               {% endif %}
             {% endfor %}
 
-
-            {% if not open_all_allow %}
-              <input class="cannot" value="All slot are already opened" disabled/>
-            {% else %}
-              <input type="submit" class="can" value="Open all slots" name="open.all" onclick="document.getElementById('popupall').style.visibility = 'visible' ;"/>
-            {% endif %}
-
-          </form>
+          </div>
     </div>
 
   {% for slot in range(3 + 2)%}
-     {% if slot == (3 + 1) %}
-        <div id="popup{{slot}}" class="overlay">
-    {% else %}
-        <div id="popupall" class="overlay">
-    {% endif %}
+      <div id="popup{{slot}}" class="overlay">
 
       <div class="popup">
         <h2>Confirmation</h2>
-        {% if slot == (3 + 1) %}
-        <div class="content">
-          To unlock All slots, Please use your card
-        </div>
-        {% else %}
+
         <div class="content">
           To unlock slot #{{slot}}, Please use your card
         </div>
-        {% endif %}
-        <div class="content" id="countdown{{slot}}">
-         Time Left : 60 Second
-        </div>
-          <form action="" method="post">
+
+          <form action="" method="post" id="send_{{count.value}}" name="send.{{count.value}}">
               <div class="button">
-                  <input name="cancel" type="submit" value="Cancel" class="btn_can">
+                <input name="open.{{count.value}}" type="submit" value="Open" class="btn_con"/>
+                <input name="cancel" type="submit" value="Cancel" class="btn_can"/>
+                  <!-- <input name="open.{{count.value}}" type="submit" value="open.{{count.value}}" class="invi"/> -->
 <!--                  <a href="#"class="btn_can">Cancel</a>-->
               </div>
           </form>
@@ -91,34 +75,16 @@
   {% endfor %}
 
  <script type="text/javascript">
-     let timeleft = 60;
-      let downloadTimer = setInterval(function() {
-          let size = "{{3 + 2}}"
-          timeleft -= 1;
-      if(timeleft <= 0){
-        clearInterval(downloadTimer);
-          for (let i = 0; i < size; i++){
-              document.getElementById("countdown"+i).innerHTML = "Timeout";
-          }
-         location.replace("http://127.0.0.1:5000/keptlock/rfid#")
-      } else{
-          for (let i = 0; i < size; i++){
-              document.getElementById("countdown"+i).innerHTML = "Time Left : " + timeleft + " second";
-          }
-      }
 
-    }, 1000);
-
-    // document.getElementById("open.1").onclick = function () {
-    // location.replace = "http://127.0.0.1:5000/keptlock/rfid#popup1";}
-    // document.getElementById("open.2").onclick = function () {
-    // location.replace = "http://127.0.0.1:5000/keptlock/rfid#popup2";}
-    // document.getElementById("open.3").onclick = function () {
-    // location.replace = "http://127.0.0.1:5000/keptlock/rfid#popup3";}
-    // document.getElementById("open.all").onclick = function () {
-    // location.replace = "http://127.0.0.1:5000/keptlock/rfid#popupall";}
-
-    
+    document.getElementById("open.1").onclick = function () {
+    location.href = "http://127.0.0.1:5000/keptlock/rfid#popup1";
+    }
+    document.getElementById("open.2").onclick = function () {
+    location.href = "http://127.0.0.1:5000/keptlock/rfid#popup2";
+  }
+    document.getElementById("open.3").onclick = function () {
+    location.href = "http://127.0.0.1:5000/keptlock/rfid#popup3";
+  }
 
   </script>
 

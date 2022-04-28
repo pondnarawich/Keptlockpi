@@ -617,6 +617,7 @@ section{
   border-radius: 0.5rem;
   background: var(--white);
     text-align: center;
+    cursor: pointer;
 }
 
 .rfid .locker .open .cannot{
@@ -639,6 +640,11 @@ section{
     font-size: 2.5rem;
     background: var(--yellow);
     color: var(--black);
+}
+
+.invi{
+  visibility: hidden;
+  display: none;
 }
 
 

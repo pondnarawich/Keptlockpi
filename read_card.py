@@ -19,7 +19,7 @@ def read_id():
     pn532.SAMconfigure()
 
     print('Waiting for the card')
-    for i in range(0,60):
+    for i in range(0,20):
         card_id = pn532.read_mifare().get_data()
         # return_dict['detect'] = True
         if (card_id == bytearray(b'K\x01\x01\x00\x04\x08\x04G\x83\xf9\xd7'))\
@@ -34,6 +34,7 @@ def read_id():
             return False
         time.sleep(1)
         print(i)
+    return False
 
 # read_id()
 

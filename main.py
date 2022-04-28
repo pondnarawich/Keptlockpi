@@ -156,18 +156,13 @@ def rfid_page():
 # @login_required
 def rfid_api():
     session.clear()
-    global stop_threads
     # global stop_threads
     global rfid_slot
-    stop_threads = False
-    rfid_status = False
 
     def open_by_rfid():
-        global rfid_status
         rfid_status = read_id()
-        stop_threads = True
         print("RFID is already unlock")
-        return
+        return rfid_status
                     
 
     # mock up data (UID of the locker account)
@@ -183,20 +178,20 @@ def rfid_api():
         for key in request.form:
             if key.startswith('open.'):
                 rfid_slot = key.partition('.')[-1]
-                open_by_rfid()
-                op = unlock_slot(rfid_slot)
-                my_bytes_value = op.data
-                my_json = my_bytes_value.decode('utf8').replace("'", '"')
-                data = json.loads(my_json)
-                s = json.dumps(data, indent=4, sort_keys=True)
-                url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
-                r = requests.post(url, data=data)
-                return redirect("http://127.0.0.1:5000/keptlock/rfid#")
+                rfid_status = read_id()
+                if rfid_status:
+                    op = unlock_api(rfid_slot)
+                    my_bytes_value = op.data
+                    my_json = my_bytes_value.decode('utf8').replace("'", '"')
+                    data = json.loads(my_json)
+                    s = json.dumps(data, indent=4, sort_keys=True)
+                    url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
+                    r = requests.post(url, data=data)
+                return redirect("http://127.0.0.1:5000/keptlock/rfid#home")
             if key.startswith('cancel'):
-                stop_threads = True
                 print('Cancel na ja')
-                return redirect("http://127.0.0.1:5000/keptlock/mode")
-    return redirect("http://127.0.0.1:5000/keptlock/mode")
+                return redirect("http://127.0.0.1:5000/keptlock/rfid#home")
+    return redirect("http://127.0.0.1:5000/keptlock/rfid#home")
 
 
 @app.route('/keptlock/pin')
