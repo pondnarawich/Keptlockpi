@@ -173,11 +173,18 @@ def rfid_api():
 
     from db_struct.locker import Locker
     locker = Locker(1234, "Pitsinee", "ABCDEFG", 3, 3, 1)
-
+    print("here")
     if request.method == 'POST':
+        print("post na ja")
+        # req = request.form
+
+        # print(req.get["open.2"])
         for key in request.form:
+            print('key')
             if key.startswith('open.'):
+                print("open naja")
                 rfid_slot = key.partition('.')[-1]
+                print(rfid_slot)
                 rfid_status = read_id()
                 if rfid_status:
                     op = unlock_api(rfid_slot)

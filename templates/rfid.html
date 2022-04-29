@@ -41,50 +41,72 @@
             {% for slot in slots %}
               {% set count.value = count.value + 1 %}
               {% if not slot %}
-                <a class="can" value="Open Slot #{{count.value}}" name="open.{{count.value}}" id="open.{{count.value}}" >Open Slot #{{count.value}}</a>
+                <a class="can" value="Open Slot #{{count.value}}"  id="openpopup.{{count.value}}" onclick="openslot('{{count.value}}')">Open Slot #{{count.value}}</a>
               {% else %}
               {% if slot%}
-               <a class="cannot" value="Slot #{{count.value}} is opened" name="open.{{count.value}}" disabled>Slot #{{count.value}} is opened</a>
+               <a class="cannot" value="Slot #{{count.value}} is opened"  disabled>Slot #{{count.value}} is opened</a>
               {% endif %}
               {% endif %}
             {% endfor %}
 
           </div>
-    </div>
 
-  {% for slot in range(3 + 2)%}
-      <div id="popup{{slot}}" class="overlay">
+  {% for slot in range(5) %}
+  <div id="popup{{slot}}" class="overlay">
 
       <div class="popup">
-        <h2>Confirmation</h2>
 
+      <div class="content">
+        Confirmation
+      </div>
         <div class="content">
           To unlock slot #{{slot}}, Please use your card
         </div>
+        <div class="content" id="countdown{{slot}}">
+          Time Left : 20 Second
+         </div>
 
-          <form action="" method="post" id="send_{{count.value}}" name="send.{{count.value}}">
+          <form action="" method="post">
               <div class="button">
-                <input name="open.{{count.value}}" type="submit" value="Open" class="btn_con"/>
                 <input name="cancel" type="submit" value="Cancel" class="btn_can"/>
-                  <!-- <input name="open.{{count.value}}" type="submit" value="open.{{count.value}}" class="invi"/> -->
-<!--                  <a href="#"class="btn_can">Cancel</a>-->
               </div>
           </form>
+
+          <form action="" method="post" name="try_submit">
+              <div class="button">
+              <input type="text" value="open.{{slot}}" name="open.{{slot}}" class="invi"></input>
+                <!-- <button name="open.{{slot}}" type="submit" value="open.{{slot}}" class="invi"></button> -->
+              </div>
+          </form>
+
       </div>
     </div>
   {% endfor %}
 
+
+
  <script type="text/javascript">
 
-    document.getElementById("open.1").onclick = function () {
-    location.href = "http://127.0.0.1:5000/keptlock/rfid#popup1";
+    function openslot(slot) {
+      url = 'http://127.0.0.1:5000/keptlock/rfid#popup'
+      slot_prefix = "open."
+    location.href = url.concat(new String(slot));
+    document.forms["try_submit"].submit()
+    let timeleft = 20;
+    let downloadTimer = setInterval(function() {
+      let size = "{{3 + 2}}"
+      timeleft -= 1;
+      if(timeleft <= 0){
+        clearInterval(downloadTimer);
+        document.getElementById("countdown"+new String(slot)).innerHTML = "Timeout"; 
+        location.replace("http://127.0.0.1:5000/keptlock/rfid#")
+      } else{
+        document.getElementById("countdown"+new String(slot)).innerHTML = "Time Left : " + timeleft + " second"; 
+      }
+
+    }, 1000);
     }
-    document.getElementById("open.2").onclick = function () {
-    location.href = "http://127.0.0.1:5000/keptlock/rfid#popup2";
-  }
-    document.getElementById("open.3").onclick = function () {
-    location.href = "http://127.0.0.1:5000/keptlock/rfid#popup3";
-  }
+
 
   </script>
 

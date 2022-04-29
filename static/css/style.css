@@ -420,13 +420,21 @@ section{
   left: 50%;
   margin-right: -50%;
   transform: translate(-50%, -50%);
+  color:rgba(0, 0, 0, 0.7);
 }
 
 .popup h2 {
   margin-top: 0;
-  color: #333;
+  color: var(--black);
   font-size: 5rem;
 }
+
+.popup .head {
+  margin-top: 0;
+  color: var(--black);
+  font-size: 5rem;
+}
+
 .popup .close {
   position: absolute;
   top: 20px;
