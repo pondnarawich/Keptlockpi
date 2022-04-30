@@ -1,0 +1,5 @@
+- unlock(slot) return success, fail, error
+- check lock status(slot) return true, false, error
+- record video in slot(slot) return success, fail, error #start after the locker slot has been unlock and stop after the locker slot is locked
+- record video above display() return success, fail, error
+- send video(video) return success, fail, error
