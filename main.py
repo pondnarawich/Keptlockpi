@@ -14,7 +14,7 @@ from flask import jsonify
 from flask import send_file
 from subprocess import call 
 
-
+ir_sensor = [16,20,21]
 
 template_dir = os.path.abspath('templates')
 static_dir = os.path.abspath('static')
@@ -57,7 +57,7 @@ gpio.setmode(gpio.BCM)
 # login_manager.session_protection = "strong"
 
 stop_threads = False
-lid = "9f45f467-8ded-4316-8229-3f0d311269ec"
+lid = "9e869542-3692-4029-Ac4c-1eb3e843b6fc"
 
 # @login_manager.user_loader
 # def load_user(user_id):
@@ -134,7 +134,7 @@ def rfid_page():
     #     return redirect("http://127.0.0.1:8000/keptlock/locker#")
     slots_stat = []
     for i in range(3):
-        locked = is_lock(elec_lock_status[i])
+        locked = is_lock(i+1,elec_lock_status[i])
         if locked == True:
             temp = False
         else:

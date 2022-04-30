@@ -2,7 +2,7 @@ import RPi.GPIO as gpio
 import time
 import spidev
 import requests
-from main import lid, elec_lock
+from main import lid, elec_lock, ir_sensor
 
 
 global locked
@@ -17,6 +17,8 @@ spi.max_speed_hz = 1000000
 
 lock_threshold = 20
 
+
+
 def adc_convert(ch):
     global spi
     raw = spi.xfer2([1, (ch<<4) | 0x80, 0])
@@ -28,8 +30,10 @@ def GeneralUnlock(slot, slot_status):
     global spi
     global lid
     print(lid)
+    global ir_sensor
     gpio.setwarnings(False)
     gpio.setmode(gpio.BCM)
+    gpio.setup(ir_sensor[slot-1], gpio.IN)
     gpio.setup(elec_lock[slot-1], gpio.OUT,initial=gpio.HIGH)
     cnt = 0
     # slot = led # remove when change to electromagnetic lock code
@@ -38,33 +42,37 @@ def GeneralUnlock(slot, slot_status):
     time.sleep(1)
     gpio.output(elec_lock[slot-1], True)
     data = {"lid": str(lid), "slot": str(slot), "opened": str(True)}
+    print(data)
     url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(lid)
     
     r = requests.post(url, data=data)
     # print(locked_status)
     while True:
         locked_status = adc_convert(slot_status)
-        if locked_status < lock_threshold:
+        ir_status = gpio.input(ir_sensor[slot-1])
+        if locked_status < lock_threshold and ir_status == False:
             cnt += 1       
-
         else:
-            cnt = 0    
+            cnt = 0   
             # print(locked_status)
-        if cnt >= 20:
+        if cnt >= 25:
             cnt = 0
             break
-        print(locked_status)
+        print(locked_status, ir_status)
         time.sleep(0.2)
     print('unlock', slot)
     return False
 
 
-def is_lock(slot_status):
+def is_lock(slot,slot_status):
     global spi
+    global ir_sensor
     cnt = 0
-    for i in range(10):
+    gpio.setup(sensor[slot-1], gpio.IN)
+    for i in range(15):
         locked_status = adc_convert(slot_status)
-        if locked_status < lock_threshold:
+        ir_status = gpio.input(sensor[slot-1])
+        if locked_status < lock_threshold and ir_status == False:
             cnt += 1
         print(locked_status)
         time.sleep(0.2)
