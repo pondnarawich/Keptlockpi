@@ -2,6 +2,7 @@ import RPi.GPIO as gpio
 import time
 import spidev
 import requests
+from main import lid, elec_lock
 
 
 global locked
@@ -25,17 +26,20 @@ def adc_convert(ch):
 
 def GeneralUnlock(slot, slot_status):
     global spi
+    global lid
+    print(lid)
     gpio.setwarnings(False)
     gpio.setmode(gpio.BCM)
-    gpio.setup(slot, gpio.OUT,initial=gpio.HIGH)
+    gpio.setup(elec_lock[slot-1], gpio.OUT,initial=gpio.HIGH)
     cnt = 0
     # slot = led # remove when change to electromagnetic lock code
     # print(locked_status)
-    gpio.output(slot, False) #change to electromagnetic lock code\
+    gpio.output(elec_lock[slot-1], False) #change to electromagnetic lock code\
     time.sleep(1)
-    gpio.output(slot, True)
-    url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
+    gpio.output(elec_lock[slot-1], True)
     data = {"lid": str(lid), "slot": str(slot), "opened": str(True)}
+    url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(lid)
+    
     r = requests.post(url, data=data)
     # print(locked_status)
     while True:

@@ -15,6 +15,7 @@ from flask import send_file
 from subprocess import call 
 
 
+
 template_dir = os.path.abspath('templates')
 static_dir = os.path.abspath('static')
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
@@ -279,7 +280,7 @@ def unlock_api(slot):
     x.start()
     x = threading.Thread(target=Start_record_main, args=(vi_path_main,camera_slot[0]))
     x.start()
-    camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
+    camera_recorded = GeneralUnlock(slot, elec_lock_status[slot-1])
     Stop_record()
     Stop_record_main()
 
@@ -310,11 +311,11 @@ def unlock_api(slot):
 
 #         data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "vi_name": str(vi_name), "vi_path_main": str(vi_path_main), "vi_name_main": str(vi_name_main),"opened": str(False)}
 
-    else:
-        print("locker is already unlock")
-        data = "locker is already unlock"
+    # else:
+    #     print("locker is already unlock")
+    #     data = "locker is already unlock"
     
-    return jsonify(data)
+    # return jsonify(data)
 
 
 @app.route('/keptlock/video')

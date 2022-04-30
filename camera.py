@@ -87,7 +87,7 @@ def Start_record_main(vi_path,camera_slot):
     videoWriter_main = cv.VideoWriter(vi_path,vid_cod_main, 30.0, (640,480))
    
 
-    if not cap.isOpened():
+    if not cap_main.isOpened():
         print("Cannot open camera")
         exit()
     while True:
