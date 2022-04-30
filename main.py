@@ -287,28 +287,28 @@ def unlock_api(slot):
     return jsonify(data)
 
 
-def unlock_slot(slot):
-    response = Response()
-    slot = int(slot)
-    print(slot)
-    global camera_recorded
-    locked = is_lock(elec_lock_status[slot-1])
-    print(locked)
-    if locked == True:
-        t = str(int(time.time()))
-        vi_name = 'video'+t
-        vi_name_main = 'videomain'+t
-        file_type = '.avi'
-        vi_path='/home/pi/Desktop/'+vi_name+file_type
-        x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot]))
-        x.start()
-        x = threading.Thread(target=Start_record_main, args=(vi_path,camera_slot[0]))
-        x.start()
-        camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
-        Stop_record()
-        Stop_record_main()
+# def unlock_slot(slot):
+#     response = Response()
+#     slot = int(slot)
+#     print(slot)
+#     global camera_recorded
+#     locked = is_lock(elec_lock_status[slot-1])
+#     print(locked)
+#     if locked == True:
+#         t = str(int(time.time()))
+#         vi_name = 'video'+t
+#         vi_name_main = 'videomain'+t
+#         file_type = '.avi'
+#         vi_path='/home/pi/Desktop/'+vi_name+file_type
+#         x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot]))
+#         x.start()
+#         x = threading.Thread(target=Start_record_main, args=(vi_path,camera_slot[0]))
+#         x.start()
+#         camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
+#         Stop_record()
+#         Stop_record_main()
 
-        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "vi_name": str(vi_name), "vi_path_main": str(vi_path_main), "vi_name_main": str(vi_name_main),"opened": str(False)}
+#         data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "vi_name": str(vi_name), "vi_path_main": str(vi_path_main), "vi_name_main": str(vi_name_main),"opened": str(False)}
 
     else:
         print("locker is already unlock")

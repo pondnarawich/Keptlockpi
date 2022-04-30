@@ -1,6 +1,7 @@
 import RPi.GPIO as gpio
 import time
 import spidev
+import requests
 
 
 global locked
@@ -33,11 +34,15 @@ def GeneralUnlock(slot, slot_status):
     gpio.output(slot, False) #change to electromagnetic lock code\
     time.sleep(1)
     gpio.output(slot, True)
+    url = 'http://0.0.0.0:8000/keptlock/locker/update/' + str(data['lid'])
+    data = {"lid": str(lid), "slot": str(slot), "opened": str(True)}
+    r = requests.post(url, data=data)
     # print(locked_status)
     while True:
         locked_status = adc_convert(slot_status)
         if locked_status < lock_threshold:
-            cnt += 1
+            cnt += 1       
+
         else:
             cnt = 0    
             # print(locked_status)

@@ -36,7 +36,7 @@ def read_id():
     x.join(timeout=40)     
         # return_dict['detect'] = True
         
-    print("RFID timeout")
+    # print("RFID timeout")
     return False
 
 # read_id()
