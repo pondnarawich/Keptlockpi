@@ -51,7 +51,7 @@
 
           </div>
 
-  {% for slot in range(5) %}
+  {% for slot in range(1,4) %}
   <div id="popup{{slot}}" class="overlay">
 
       <div class="popup">
@@ -63,7 +63,7 @@
           To unlock slot #{{slot}}, Please use your card
         </div>
         <div class="content" id="countdown{{slot}}">
-          Time Left : 20 Second
+          Time Left : 40 Second
          </div>
 
           <form action="" method="post">
@@ -72,9 +72,9 @@
               </div>
           </form>
 
-          <form action="" method="post" name="try_submit">
+          <form action="" method="post" name="try_submit{{slot}}">
               <div class="button">
-              <input type="text" value="open.{{slot}}" name="open.{{slot}}" class="invi"></input>
+              <input type="text" value="open_{{slot}}" name="open_{{slot}}" class="invi"></input>
                 <!-- <button name="open.{{slot}}" type="submit" value="open.{{slot}}" class="invi"></button> -->
               </div>
           </form>
@@ -90,11 +90,11 @@
     function openslot(slot) {
       url = 'http://127.0.0.1:5000/keptlock/rfid#popup'
       slot_prefix = "open."
+      form_prefix = "try_submit"
     location.href = url.concat(new String(slot));
-    document.forms["try_submit"].submit()
-    let timeleft = 20;
+    document.forms[form_prefix.concat(new String(slot))].submit()
+    let timeleft = 40;
     let downloadTimer = setInterval(function() {
-      let size = "{{3 + 2}}"
       timeleft -= 1;
       if(timeleft <= 0){
         clearInterval(downloadTimer);

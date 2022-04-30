@@ -13,6 +13,8 @@ spi = spidev.SpiDev()
 spi.open(0,0)
 spi.max_speed_hz = 1000000
 
+lock_threshold = 20
+
 def adc_convert(ch):
     global spi
     raw = spi.xfer2([1, (ch<<4) | 0x80, 0])
@@ -34,7 +36,7 @@ def GeneralUnlock(slot, slot_status):
     # print(locked_status)
     while True:
         locked_status = adc_convert(slot_status)
-        if locked_status < 10:
+        if locked_status < lock_threshold:
             cnt += 1
         else:
             cnt = 0    
@@ -53,7 +55,7 @@ def is_lock(slot_status):
     cnt = 0
     for i in range(10):
         locked_status = adc_convert(slot_status)
-        if locked_status < 10:
+        if locked_status < lock_threshold:
             cnt += 1
         print(locked_status)
         time.sleep(0.2)

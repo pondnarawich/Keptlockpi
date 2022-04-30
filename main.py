@@ -23,7 +23,7 @@ app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 elec_lock = [5,6,13]
 elec_lock_status = [0,1,2]
 stop_threads = False
-camera_slot = ["/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0"]
+camera_slot = ["/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-video-index0", "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-video-index0"]
 
 # lock1_status = 2
 # lock2 = 13
@@ -176,15 +176,12 @@ def rfid_api():
     print("here")
     if request.method == 'POST':
         print("post na ja")
-        # req = request.form
-
-        # print(req.get["open.2"])
         for key in request.form:
-            print('key')
-            if key.startswith('open.'):
-                print("open naja")
-                rfid_slot = key.partition('.')[-1]
-                print(rfid_slot)
+            if key.startswith('open_'):
+                print(key)
+                rfid_slot = key.partition('_')[-1]
+                print("open naja", rfid_slot)
+
                 rfid_status = read_id()
                 if rfid_status:
                     op = unlock_api(rfid_slot)
@@ -274,14 +271,19 @@ def unlock_api(slot):
     global camera_recorded
     t = str(int(time.time()))
     vi_name = 'video'+t
+    vi_name_main = 'videomain'+t
     file_type = '.avi'
     vi_path='/home/pi/Desktop/'+vi_name+file_type
-    x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot],))
+    vi_path_main = '/home/pi/Desktop/'+vi_name_main+file_type
+    x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot]))
+    x.start()
+    x = threading.Thread(target=Start_record_main, args=(vi_path_main,camera_slot[0]))
     x.start()
     camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
     Stop_record()
+    Stop_record_main()
 
-    data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(False), 'vi_name': str(vi_name)}
+    data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "vi_name": str(vi_name), "vi_path_main": str(vi_path_main), "vi_name_main": str(vi_name_main),"opened": str(False)}
     return jsonify(data)
 
 
@@ -295,14 +297,18 @@ def unlock_slot(slot):
     if locked == True:
         t = str(int(time.time()))
         vi_name = 'video'+t
+        vi_name_main = 'videomain'+t
         file_type = '.avi'
         vi_path='/home/pi/Desktop/'+vi_name+file_type
         x = threading.Thread(target=Start_record, args=(vi_path,camera_slot[slot]))
         x.start()
+        x = threading.Thread(target=Start_record_main, args=(vi_path,camera_slot[0]))
+        x.start()
         camera_recorded = GeneralUnlock(elec_lock[slot-1], elec_lock_status[slot-1])
         Stop_record()
+        Stop_record_main()
 
-        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "opened": str(False), 'vi_name': str(vi_name)}
+        data = {"lid": str(lid), "slot": str(slot), "vi_path": str(vi_path), "vi_name": str(vi_name), "vi_path_main": str(vi_path_main), "vi_name_main": str(vi_name_main),"opened": str(False)}
 
     else:
         print("locker is already unlock")
