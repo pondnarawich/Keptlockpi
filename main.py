@@ -57,7 +57,7 @@ gpio.setmode(gpio.BCM)
 # login_manager.session_protection = "strong"
 
 stop_threads = False
-lid = "9e869542-3692-4029-Ac4c-1eb3e843b6fc"
+lid = "9e869542-3692-4029-ac4c-1eb3e843b6fc"
 
 # @login_manager.user_loader
 # def load_user(user_id):
