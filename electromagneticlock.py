@@ -15,7 +15,7 @@ spi = spidev.SpiDev()
 spi.open(0,0)
 spi.max_speed_hz = 1000000
 
-lock_threshold = 20
+lock_threshold = 40
 
 
 
@@ -68,13 +68,13 @@ def is_lock(slot,slot_status):
     global spi
     global ir_sensor
     cnt = 0
-    gpio.setup(sensor[slot-1], gpio.IN)
+    gpio.setup(ir_sensor[slot-1], gpio.IN)
     for i in range(15):
         locked_status = adc_convert(slot_status)
-        ir_status = gpio.input(sensor[slot-1])
+        ir_status = gpio.input(ir_sensor[slot-1])
         if locked_status < lock_threshold and ir_status == False:
             cnt += 1
-        print(locked_status)
+        print(locked_status, ir_status)
         time.sleep(0.2)
     if cnt >= 10:
         return True
