@@ -13,6 +13,7 @@ from read_card import *
 from flask import jsonify
 from flask import send_file
 from subprocess import call 
+from humid_sensor import *
 
 ir_sensor = [16,20,21]
 
@@ -58,6 +59,9 @@ gpio.setmode(gpio.BCM)
 
 stop_threads = False
 lid = "9e869542-3692-4029-ac4c-1eb3e843b6fc"
+
+x = threading.Thread(target=check_humid, args=(lid,))
+x.start()
 
 # @login_manager.user_loader
 # def load_user(user_id):
@@ -227,10 +231,11 @@ def pin_api():
         url = 'http://0.0.0.0:8000/keptlock/locker/unlock/validate/pin/' + lid
         code = {'code': pin}
         r = requests.get(url, data=code)
-        slot = int(r.json()['slot'])
+        
         pin_valid = False
         if r.status_code == 200:
             pin_valid = True
+            slot = int(r.json()['slot'])
 
         if not pin_valid:
             flash("Invalid pin or expired")
@@ -270,6 +275,7 @@ def unlock_api(slot):
     slot = int(slot)
     print(slot)
     global camera_recorded
+    global lid
     t = str(int(time.time()))
     vi_name = 'video'+t
     vi_name_main = 'videomain'+t
@@ -381,3 +387,4 @@ if __name__ == '__main__':
 
     app.debug = True
     app.run(host='127.0.0.1', port=5000)
+    
